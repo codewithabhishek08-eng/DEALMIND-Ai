@@ -53,6 +53,7 @@ const ChartTooltip = ({ active, payload, label }: any) => {
 export default function ReportsPage() {
   const [timeFilter, setTimeFilter] = useState<'Weekly'|'Monthly'|'Quarterly'|'Yearly'>('Monthly');
   const [isExporting, setIsExporting] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {

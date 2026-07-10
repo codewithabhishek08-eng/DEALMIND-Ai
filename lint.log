@@ -1,0 +1,104 @@
+
+> dealmind-ai@0.1.0 lint
+> eslint
+
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(auth)/login/page.tsx
+  108:26  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(auth)/login/page.tsx:108:26
+  106 |               <Checkbox 
+  107 |                 id="remember" 
+> 108 |                 checked={form.watch('rememberMe')}
+      |                          ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  109 |                 onCheckedChange={(checked) => form.setValue('rememberMe', checked as boolean)}
+  110 |               />
+  111 |               <label  react-hooks/incompatible-library
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(auth)/register/page.tsx
+  55:15  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(auth)/register/page.tsx:55:15
+  53 |
+  54 |   // Calculate password strength
+> 55 |   const pwd = form.watch("password") || "";
+     |               ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  56 |   const hasLength = pwd.length >= 8;
+  57 |   const hasUpper = /[A-Z]/.test(pwd);
+  58 |   const hasNumber = /[0-9]/.test(pwd);  react-hooks/incompatible-library
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/ai-analysis/page.tsx
+  6:52  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/dashboard/page.tsx
+  226:129  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  287:79   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/deals/[id]/page.tsx
+   8:52  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+  19:15  warning  'BarChart3' is defined but never used        @typescript-eslint/no-unused-vars
+  43:16  warning  'err' is defined but never used              @typescript-eslint/no-unused-vars
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/email/page.tsx
+  2:1  warning  Unused eslint-disable directive (no problems were reported from 'react/no-unescaped-entities')
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/meetings/page.tsx
+   9:10  warning  'Badge' is defined but never used  @typescript-eslint/no-unused-vars
+  13:27  warning  'Play' is defined but never used   @typescript-eslint/no-unused-vars
+  14:41  warning  'Hash' is defined but never used   @typescript-eslint/no-unused-vars
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/profile/page.tsx
+    9:16  warning  'Mail' is defined but never used       @typescript-eslint/no-unused-vars
+    9:48  warning  'Briefcase' is defined but never used  @typescript-eslint/no-unused-vars
+  113:48  warning  'index' is defined but never used      @typescript-eslint/no-unused-vars
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/reports/page.tsx
+   6:10  warning  'Badge' is defined but never used                  @typescript-eslint/no-unused-vars
+   8:3   warning  'LineChart' is defined but never used              @typescript-eslint/no-unused-vars
+   8:14  warning  'Line' is defined but never used                   @typescript-eslint/no-unused-vars
+  26:7   warning  'topCustomers' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  56:36  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/settings/page.tsx
+   47:21  warning  'registerNotif' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   52:21  warning  'registerAi' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   58:33  warning  'data' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   64:30  warning  'data' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   69:27  warning  'data' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  125:59  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/settings/page.tsx:125:59
+  123 |                   <CardContent className="space-y-4">
+  124 |                     <div className="flex items-center space-x-2">
+> 125 |                       <Checkbox id="email-notif" checked={watchNotif('emailNotif')} onCheckedChange={(c) => setNotifValue('emailNotif', !!c)} />
+      |                                                           ^^^^^^^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  126 |                       <label htmlFor="email-notif" className="text-sm font-medium leading-none">Email Notifications</label>
+  127 |                     </div>
+  128 |                     <div className="flex items-center space-x-2">  react-hooks/incompatible-library
+
+/Users/abhishekkumar/DEALMIND Ai/src/app/(dashboard)/tasks/page.tsx
+   6:29  warning  'CardHeader' is defined but never used   @typescript-eslint/no-unused-vars
+   6:41  warning  'CardTitle' is defined but never used    @typescript-eslint/no-unused-vars
+  10:34  warning  'Clock' is defined but never used        @typescript-eslint/no-unused-vars
+  10:65  warning  'AlertCircle' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/abhishekkumar/DEALMIND Ai/src/components/dashboard/QuickActions.tsx
+  18:10  warning  'DealStage' is defined but never used  @typescript-eslint/no-unused-vars
+  18:21  warning  'RiskLevel' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/abhishekkumar/DEALMIND Ai/src/components/layout/Header.tsx
+  8:18  warning  'buttonVariants' is defined but never used  @typescript-eslint/no-unused-vars
+  9:10  warning  'cn' is defined but never used              @typescript-eslint/no-unused-vars
+
+/Users/abhishekkumar/DEALMIND Ai/src/lib/api.ts
+  5:20  warning  'DealDetailsData' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 35 problems (3 errors, 32 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

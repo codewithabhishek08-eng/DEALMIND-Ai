@@ -1,368 +1,317 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react/no-unescaped-entities */
-
 "use client";
 
 import { useEffect, useState } from "react";
-import { getDashboardData } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
-import { QuickActions } from "@/components/dashboard/QuickActions";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { 
-  DollarSign, Percent, Briefcase, Activity, 
-  Target, TrendingUp, AlertTriangle, CheckCircle2,
-  Calendar, CheckSquare, BrainCircuit, XCircle
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
+} from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Plus, Video, DollarSign, Target, AlertTriangle, BrainCircuit,
+  TrendingUp, TrendingDown, CheckCircle2, Lightbulb
 } from "lucide-react";
 import {
-  BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
+
+// Simple count up hook for the KPIs
+function useCountUp(end: number, duration: number = 1500) {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    let startTimestamp: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      // easeOutQuart
+      const ease = 1 - Math.pow(1 - progress, 4);
+      setCount(Math.floor(ease * end));
+      
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      } else {
+        setCount(end);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }, [end, duration]);
+  
+  return count;
+}
+
+// Formatters
+const formatCurrency = (val: number) => `$${(val / 1000000).toFixed(1)}M`;
+const formatCompactCurrency = (val: number) => `$${(val / 1000)}k`;
+
+// Hardcoded Demo Data
+const REVENUE_DATA = [
+  { month: "Jan", revenue: 45000 },
+  { month: "Feb", revenue: 52000 },
+  { month: "Mar", revenue: 48000 },
+  { month: "Apr", revenue: 61000 },
+  { month: "May", revenue: 59000 },
+  { month: "Jun", revenue: 75000 },
+  { month: "Jul", revenue: 82000 },
+];
+
+const RECENT_DEALS = [
+  { id: 1, deal: "Enterprise License", company: "Microsoft", value: 120000, stage: "Negotiation", aiScore: 92 },
+  { id: 2, deal: "Cloud Migration", company: "Amazon", value: 85000, stage: "Proposal", aiScore: 78 },
+  { id: 3, deal: "Security Audit", company: "ABC Corp", value: 45000, stage: "At Risk", aiScore: 42 },
+  { id: 4, deal: "Data Platform", company: "Netflix", value: 150000, stage: "Won", aiScore: 98 },
+  { id: 5, deal: "API Integration", company: "Stripe", value: 35000, stage: "Discovery", aiScore: 65 },
+];
+
+const TODAY_TASKS = [
+  { id: 1, text: "Review Microsoft contract redlines", time: "10:00 AM", completed: false },
+  { id: 2, text: "Send follow-up to ABC Corp", time: "1:30 PM", completed: false },
+  { id: 3, text: "Prep for Amazon presentation", time: "3:00 PM", completed: false },
+  { id: 4, text: "Sync with pre-sales engineer", time: "9:00 AM", completed: true },
+];
 
 export default function Dashboard() {
   const { user } = useAuthStore();
-  const [data, setData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchDashboardData = async () => {
-    setIsLoading(true);
-    const dashboardData = await getDashboardData();
-    setData(dashboardData);
-    setIsLoading(false);
+  const [tasks, setTasks] = useState(TODAY_TASKS);
+  
+  // KPI Countups
+  const pipelineValue = useCountUp(2400000);
+  const winRate = useCountUp(78);
+  const highRisk = useCountUp(5);
+  const aiConfidence = useCountUp(94);
+  
+  const toggleTask = (id: number) => {
+    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
   };
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchDashboardData();
-  }, []);
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(value);
+  const getStageColor = (stage: string) => {
+    switch(stage) {
+      case 'Negotiation': return 'bg-primary/20 text-primary border-primary/30';
+      case 'Won': return 'bg-success/20 text-success border-success/30';
+      case 'At Risk': return 'bg-warning/20 text-warning border-warning/30';
+      case 'Lost': return 'bg-destructive/20 text-destructive border-destructive/30';
+      default: return 'bg-muted text-muted-foreground border-border';
+    }
   };
 
-  const COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
-  const PIE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
-
-  if (isLoading || !data) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-end">
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-[250px]" />
-            <Skeleton className="h-4 w-[350px]" />
-          </div>
-          <Skeleton className="h-10 w-[400px]" />
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} className="h-28 w-full" />
-          ))}
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Skeleton className="h-[350px] w-full" />
-          <Skeleton className="h-[350px] w-full" />
-        </div>
-      </div>
-    );
-  }
-
-  const {
-    insights, monthlyRevenue, funnelData, salesPerformance,
-    activities, meetings, tasks, recommendations
-  } = data;
-
-  // Derive pie chart data from funnelData (mocking Deal Status)
-  const pieData = funnelData.map((d: any) => ({ name: d.stage, value: d.count }));
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-success';
+    if (score >= 50) return 'text-warning';
+    return 'text-destructive';
+  };
 
   return (
-    <div className="space-y-8 pb-8">
-      {/* Welcome & Quick Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-300 ease-out">
+      
+      {/* 1. Welcome Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user?.name || "User"}</h1>
-          <p className="text-muted-foreground mt-1">Here is your Today's Summary. You have {tasks.length} pending tasks and {meetings.length} upcoming meetings.</p>
+          <h1 className="text-3xl font-bold tracking-tight">👋 Welcome Back, {user?.name || "Abhishek"}</h1>
+          <p className="text-muted-foreground mt-1">AI analyzed <strong className="text-foreground font-medium">18 deals</strong> today and <strong className="text-warning font-medium">3 deals</strong> need immediate attention.</p>
         </div>
-        <QuickActions onActionComplete={fetchDashboardData} />
-      </div>
-
-      {/* 8 Stat Cards */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(insights.revenue)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pipeline Health</CardTitle>
-            <Activity className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{insights.pipelineHealth}/100</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">AI Confidence</CardTitle>
-            <BrainCircuit className="h-4 w-4 text-accent" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-accent">{insights.aiConfidence}%</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Deal Value</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(insights.averageDealValue)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Deals</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{insights.totalDeals}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Open Deals</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{insights.openDeals}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Won Deals</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{insights.wonDeals}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lost Deals</CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{insights.lostDeals}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Grid */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Monthly Revenue (Area) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Monthly Revenue</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyRevenue} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
-                <YAxis tickFormatter={(val) => `$${val/1000}k`} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
-                <Tooltip 
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  formatter={(val: any) => formatCurrency(val)} 
-                  contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '8px' }}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="#2563EB" fillOpacity={1} fill="url(#colorRev)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Deal Funnel (Bar) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Deal Funnel</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={funnelData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
-                <XAxis type="number" hide />
-                <YAxis dataKey="stage" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} width={100} />
-                <Tooltip cursor={{ fill: 'var(--muted)' }} contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '8px' }} />
-                <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} barSize={24}>
-                  {funnelData.map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Deal Status (Pie) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Deal Distribution</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {pieData.map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '8px' }} />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Sales Performance (Bar) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Sales Performance</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={salesPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                <XAxis dataKey="rep" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
-                <YAxis tickFormatter={(val) => `$${val/1000}k`} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
-                <Tooltip 
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  formatter={(val: any) => formatCurrency(val)} 
-                  cursor={{ fill: 'transparent' }}
-                  contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '8px' }}
-                />
-                <Bar dataKey="won" fill="#8B5CF6" radius={[4, 4, 0, 0]} barSize={32} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Feeds Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* AI Recommendations */}
-        <Card className="lg:col-span-1 border-accent/30 shadow-[0_0_15px_rgba(34,211,238,0.1)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BrainCircuit className="w-5 h-5 text-accent" />
-              AI Recommendations
-            </CardTitle>
-            <CardDescription>Generated based on pipeline activity</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {recommendations.map((rec: any) => (
-              <div key={rec.id} className="p-3 bg-muted/50 rounded-lg border border-border/50">
-                <div className="flex justify-between items-start mb-2">
-                  <Badge variant={rec.urgency === 'High' ? 'destructive' : 'secondary'} className="text-[10px]">
-                    {rec.type}
-                  </Badge>
-                </div>
-                <p className="text-sm mb-3">{rec.description}</p>
-                <p className="text-xs font-medium text-accent hover:underline cursor-pointer">
-                  {rec.actionLabel} &rarr;
-                </p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Upcoming Meetings & Tasks */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary" />
-                Upcoming Meetings
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {meetings.map((m: any) => (
-                <div key={m.id} className="flex justify-between items-center border-b pb-2 last:border-0 last:pb-0">
-                  <div>
-                    <p className="text-sm font-medium">{m.title}</p>
-                    <p className="text-xs text-muted-foreground">{m.time} • {m.platform}</p>
-                  </div>
-                  <Badge variant="outline">{m.participants} ppl</Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <CheckSquare className="w-4 h-4 text-primary" />
-                Today's Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {tasks.map((t: any) => (
-                <div key={t.id} className="flex justify-between items-start border-b pb-2 last:border-0 last:pb-0">
-                  <div>
-                    <p className="text-sm font-medium">{t.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{t.deadline}</p>
-                  </div>
-                  <Badge variant={t.priority === 'High' ? 'destructive' : 'secondary'}>{t.priority}</Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="gap-2">
+            <Video className="w-4 h-4" /> Analyze Meeting
+          </Button>
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" /> New Deal
+          </Button>
         </div>
+      </div>
 
-        {/* Recent Activities */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Activity className="w-4 h-4 text-primary" />
-              Recent Activities
-            </CardTitle>
+      {/* 2. KPI Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="hover:-translate-y-1 hover:shadow-lg transition-all duration-200 ease-out border-border/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pipeline Value</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground opacity-50" />
           </CardHeader>
           <CardContent>
-            <div className="relative border-l border-muted ml-3 space-y-6">
-              {activities.map((act: any, i: number) => (
-                <div key={act.id} className="pl-6 relative">
-                  <span className="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-background" />
-                  <p className="text-sm font-medium">{act.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(act.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              ))}
+            <div className="text-3xl font-bold tabular-nums">{formatCurrency(pipelineValue)}</div>
+            <div className="flex items-center text-xs mt-1 text-success font-medium">
+              <TrendingUp className="w-3 h-3 mr-1" /> 12% from last month
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:-translate-y-1 hover:shadow-lg transition-all duration-200 ease-out border-border/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Win Rate</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground opacity-50" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold tabular-nums">{winRate}%</div>
+            <div className="flex items-center text-xs mt-1 text-success font-medium">
+              <TrendingUp className="w-3 h-3 mr-1" /> 4% from last month
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:-translate-y-1 hover:shadow-lg transition-all duration-200 ease-out border-border/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">High Risk Deals</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-warning opacity-50" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold tabular-nums">{highRisk}</div>
+            <div className="flex items-center text-xs mt-1 text-destructive font-medium">
+              <TrendingDown className="w-3 h-3 mr-1" /> 2 more than yesterday
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:-translate-y-1 hover:shadow-lg transition-all duration-200 ease-out border-border/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">AI Confidence</CardTitle>
+            <BrainCircuit className="h-4 w-4 text-primary opacity-50" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold tabular-nums">{aiConfidence}%</div>
+            <div className="flex items-center text-xs mt-1 text-muted-foreground">
+              Based on historical win patterns
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* 3. Middle Row (Chart & Insights) */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+        <Card className="lg:col-span-7 border-border/50">
+          <CardHeader>
+            <CardTitle className="text-lg">Revenue Trajectory</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={REVENUE_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-border stroke-border opacity-20" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }} />
+                <YAxis tickFormatter={formatCompactCurrency} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }} />
+                <Tooltip 
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  formatter={(val: any) => [`$${Number(val).toLocaleString()}`, 'Revenue']}
+                  contentStyle={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', borderRadius: '8px', color: 'var(--color-foreground)' }}
+                  itemStyle={{ color: 'var(--color-foreground)' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="revenue" 
+                  stroke="var(--color-primary)" 
+                  strokeWidth={3} 
+                  dot={false}
+                  activeDot={{ r: 6, fill: 'var(--color-primary)' }}
+                  isAnimationActive={true}
+                  animationDuration={1500}
+                  animationEasing="ease-out"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-3 border-border/50 flex flex-col">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BrainCircuit className="w-5 h-5 text-primary" /> AI Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-between gap-4">
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-success/5 border border-success/10">
+              <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
+              <p className="text-sm text-foreground/90"><strong className="font-semibold text-foreground">Microsoft</strong> deal has a 92% chance to close this week.</p>
+            </div>
+            
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-warning/5 border border-warning/10">
+              <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+              <p className="text-sm text-foreground/90"><strong className="font-semibold text-foreground">ABC Corp</strong> hasn&apos;t replied in 5 days. Risk of stalling.</p>
+            </div>
+            
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
+              <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <p className="text-sm text-foreground/90">Send a targeted case study to <strong className="font-semibold text-foreground">Amazon</strong> to address technical concerns.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 4. Bottom Row (Deals Table & Tasks) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 border-border/50">
+          <CardHeader>
+            <CardTitle className="text-lg">Recent Deals</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Deal</TableHead>
+                  <TableHead>Value</TableHead>
+                  <TableHead>Stage</TableHead>
+                  <TableHead className="text-right">AI Score</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {RECENT_DEALS.map((deal) => (
+                  <TableRow key={deal.id} className="hover:bg-muted/30 transition-colors">
+                    <TableCell>
+                      <p className="font-medium">{deal.deal}</p>
+                      <p className="text-xs text-muted-foreground">{deal.company}</p>
+                    </TableCell>
+                    <TableCell className="font-medium tabular-nums">${deal.value.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={`font-medium ${getStageColor(deal.stage)}`}>
+                        {deal.stage}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <span className={`font-bold tabular-nums ${getScoreColor(deal.aiScore)}`}>{deal.aiScore}</span>
+                        <div className="w-12 h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full ${getScoreColor(deal.aiScore).replace('text-', 'bg-')}`} 
+                            style={{ width: `${deal.aiScore}%` }} 
+                          />
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-muted-foreground" /> Today&apos;s Tasks
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {tasks.map(task => (
+              <div key={task.id} className="flex items-start gap-3 group">
+                <Checkbox 
+                  id={`task-${task.id}`} 
+                  checked={task.completed} 
+                  onCheckedChange={() => toggleTask(task.id)}
+                  className="mt-0.5"
+                />
+                <label 
+                  htmlFor={`task-${task.id}`}
+                  className={`text-sm cursor-pointer select-none flex-1 transition-all ${task.completed ? 'text-muted-foreground line-through' : 'text-foreground font-medium'}`}
+                >
+                  {task.text}
+                </label>
+                <Badge variant="secondary" className="text-[10px] whitespace-nowrap opacity-70">
+                  {task.time}
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
     </div>
   );
 }
