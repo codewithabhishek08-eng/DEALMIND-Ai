@@ -48,7 +48,7 @@ export default function RegisterPage() {
     // Immediately login with the new email
     await login(values.email);
     setIsLoading(false);
-    router.push("/");
+    router.push("/dashboard");
   }
 
   // Calculate password strength

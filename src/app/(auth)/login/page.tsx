@@ -40,7 +40,7 @@ export default function LoginPage() {
     await new Promise(resolve => setTimeout(resolve, 800));
     await login(values.email);
     setIsLoading(false);
-    router.push("/");
+    router.push("/dashboard");
   }
 
   const handleOAuthLogin = async (provider: string) => {
@@ -48,7 +48,7 @@ export default function LoginPage() {
     await new Promise(resolve => setTimeout(resolve, 1200));
     await login(`${provider}_user@example.com`);
     setOauthLoading(null);
-    router.push("/");
+    router.push("/dashboard");
   };
 
   return (
