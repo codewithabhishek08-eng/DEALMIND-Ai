@@ -23,7 +23,6 @@ const navItems = [
   { path: "/customers", label: "Customers", icon: Users },
   { path: "/tasks", label: "Tasks", icon: CheckSquare },
   { path: "/reports", label: "Reports", icon: LineChart },
-  { path: "/notifications", label: "Notifications", icon: Bell },
   { path: "/settings", label: "Settings", icon: Settings },
 ];
 

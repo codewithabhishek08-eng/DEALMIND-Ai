@@ -90,7 +90,9 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Help & Support</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Help & Support</DropdownMenuLabel>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem>Documentation</DropdownMenuItem>
@@ -109,10 +111,12 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel className="flex justify-between items-center">
-                Notifications
-                {unreadCount > 0 && <Badge variant="secondary" className="text-xs font-normal">{unreadCount} Unread</Badge>}
-              </DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="flex justify-between items-center">
+                  Notifications
+                  {unreadCount > 0 && <Badge variant="secondary" className="text-xs font-normal">{unreadCount} Unread</Badge>}
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <div className="max-h-[300px] overflow-y-auto">
                 <div className="p-3 hover:bg-muted cursor-pointer transition-colors border-b">
@@ -155,14 +159,16 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.name || 'User'}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email || 'user@example.com'}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user?.name || 'User'}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user?.email || 'user@example.com'}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => router.push('/profile')}>
