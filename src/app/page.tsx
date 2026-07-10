@@ -115,8 +115,10 @@ export default function LandingPage() {
             DEALMIND <span className="text-primary">AI</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Log in
+            <Link href="/login">
+              <Button variant="ghost" size="sm" className="rounded-full px-5 hover:bg-muted/50 transition-colors font-medium">
+                Sign In
+              </Button>
             </Link>
             <Link href="/dashboard">
               <Button size="sm" className="rounded-full px-5 hover:scale-105 transition-transform duration-200">
@@ -177,7 +179,10 @@ export default function LandingPage() {
           variants={mockupReveal}
           className="w-full max-w-5xl mx-auto mt-20 relative z-10"
         >
-          <div className="relative rounded-xl border border-[#2A3142] bg-[#0B1120] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden text-[#F8FAFC]">
+          <Link href="/dashboard" className="block relative rounded-xl border border-[#2A3142] bg-[#0B1120] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden text-[#F8FAFC] hover:border-primary/50 transition-colors cursor-pointer group">
+            {/* Hover Overlay */}
+            <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors z-20 pointer-events-none" />
+            
             {/* Browser Chrome */}
             <div className="h-10 border-b border-[#2A3142] bg-[#131922] flex items-center px-4 gap-2">
               <div className="w-3 h-3 rounded-full bg-destructive/80" />
@@ -275,7 +280,7 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </motion.div>
       </section>
 
